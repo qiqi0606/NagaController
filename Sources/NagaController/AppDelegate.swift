@@ -3,8 +3,9 @@ import UserNotifications
 
 final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, NSPopoverDelegate {
     private var statusItem: NSStatusItem!
-    private let popover = NSPopover()
+    private var popover: NSPopover?
     private var popoverClickMonitor: Any?
+    private var popoverWorkspaceObservers: [NSObjectProtocol] = []
     private let eventTapManager = EventTapManager.shared
     private var batteryObserver: NSObjectProtocol?
     private var profileObserver: NSObjectProtocol?
@@ -60,14 +61,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, NSPo
             button.target = self
         }
 
-        // Popover content
-        popover.behavior = .transient
-        popover.delegate = self
-        if #available(macOS 10.14, *) {
-            popover.appearance = NSAppearance(named: .vibrantDark)
-        }
-        popover.contentViewController = MainViewController()
-
         // Notifications (low battery alerts)
         requestNotificationAuthorizationIfPossible()
 
@@ -106,7 +99,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, NSPo
 
     func applicationWillTerminate(_ notification: Notification) {
         eventTapManager.stop()
-        stopMonitoringPopoverClicks()
+        popover?.close()
+        stopMonitoringPopover()
         if let profileObserver { NotificationCenter.default.removeObserver(profileObserver) }
     }
 
@@ -150,38 +144,71 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, NSPo
 
     @objc private func togglePopover(_ sender: Any?) {
         guard let button = statusItem.button else { return }
-        if popover.isShown {
-            popover.performClose(sender)
-        } else {
-            if let mainVC = popover.contentViewController as? MainViewController {
-                mainVC.refreshPermissionStatuses()
-            }
-            popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
+        if let popover {
+            popover.close()
+            return
+        }
+
+        let popover = NSPopover()
+        popover.behavior = .transient
+        popover.delegate = self
+        popover.appearance = NSAppearance(named: .vibrantDark)
+        popover.contentViewController = MainViewController()
+        self.popover = popover
+        popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
+        if !popover.isShown, self.popover === popover {
+            stopMonitoringPopover()
+            self.popover = nil
         }
     }
 
     func popoverWillShow(_ notification: Notification) {
-        guard popoverClickMonitor == nil else { return }
+        guard let shown = notification.object as? NSPopover, popover === shown else { return }
+        stopMonitoringPopover()
         // A menu-bar app can show its popover while another app still owns focus.
         // Observe outside clicks without intercepting them or activating this app.
         popoverClickMonitor = NSEvent.addGlobalMonitorForEvents(
             matching: [.leftMouseDown, .rightMouseDown, .otherMouseDown]
-        ) { [weak self] event in
-            self?.dismissPopoverOnOutsideClick(event)
+        ) { [weak self, weak shown] event in
+            guard let self, let shown, self.popover === shown else { return }
+            self.dismissPopoverOnOutsideClick(event, popover: shown)
         }
+
+        let workspace = NSWorkspace.shared.notificationCenter
+        popoverWorkspaceObservers = [
+            workspace.addObserver(forName: NSWorkspace.activeSpaceDidChangeNotification, object: nil, queue: .main) { [weak self, weak shown] _ in
+                guard let self, let shown, self.popover === shown else { return }
+                shown.close()
+            },
+            workspace.addObserver(forName: NSWorkspace.didActivateApplicationNotification, object: nil, queue: .main) { [weak self, weak shown] note in
+                guard let self, let shown, self.popover === shown,
+                      let app = note.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication,
+                      app.processIdentifier != ProcessInfo.processInfo.processIdentifier else { return }
+                shown.close()
+            }
+        ]
     }
 
     func popoverDidClose(_ notification: Notification) {
-        stopMonitoringPopoverClicks()
+        guard let closed = notification.object as? NSPopover, popover === closed else { return }
+        stopMonitoringPopover()
+        // Release the status item anchor with this presentation.
+        popover = nil
     }
 
-    private func stopMonitoringPopoverClicks() {
-        guard let monitor = popoverClickMonitor else { return }
-        NSEvent.removeMonitor(monitor)
-        popoverClickMonitor = nil
+    private func stopMonitoringPopover() {
+        if let monitor = popoverClickMonitor {
+            NSEvent.removeMonitor(monitor)
+            popoverClickMonitor = nil
+        }
+        let workspace = NSWorkspace.shared.notificationCenter
+        for observer in popoverWorkspaceObservers {
+            workspace.removeObserver(observer)
+        }
+        popoverWorkspaceObservers.removeAll()
     }
 
-    private func dismissPopoverOnOutsideClick(_ event: NSEvent) {
+    private func dismissPopoverOnOutsideClick(_ event: NSEvent, popover: NSPopover) {
         guard popover.isShown else { return }
         let location = event.window?.convertPoint(toScreen: event.locationInWindow)
             ?? event.locationInWindow
@@ -194,7 +221,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, NSPo
             // Let the status button's own action handle a repeat click.
             if buttonFrame.contains(location) { return }
         }
-        popover.performClose(nil)
+        popover.close()
     }
 
     private func handleBatteryUpdate() {
