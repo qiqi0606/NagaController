@@ -135,6 +135,10 @@ final class ButtonMapper {
         switch action {
         case .keySequence(let keys, _):
             if let stroke = keys.first, keys.count == 1 {
+                if stroke.key == KeyStroke.dualCommandIdentifier {
+                    sendDualCommand()
+                    return
+                }
                 let keyCode = effectiveKeyCode(for: stroke)
                 
                 // NEW: Standalone modifier support (Shift, CMD, etc.)
@@ -296,6 +300,10 @@ final class ButtonMapper {
     }
 
     private func sendKeyStroke(_ stroke: KeyStroke, withPhysicalModifiers: Bool = false) {
+        if stroke.key == KeyStroke.dualCommandIdentifier {
+            sendDualCommand()
+            return
+        }
         // Map simple keys (letters) to key codes; limited for Phase 1
         guard let resolved = resolve(stroke) else { return }
         let keyCode = resolved.code
@@ -317,6 +325,41 @@ final class ButtonMapper {
             post(eventUp)
             finishShortcut(flags)
         }
+    }
+
+    private func sendDualCommand() {
+        // Device-dependent Command bits from IOKit/hidsystem/IOLLEvent.h.
+        let left = CGEventFlags(rawValue: 0x08)
+        let right = CGEventFlags(rawValue: 0x10)
+        let sides = left.union(right)
+        let keys: [(code: CGKeyCode, side: CGEventFlags)] = [
+            (CGKeyCode(kVK_Command), left), (CGKeyCode(kVK_RightCommand), right)
+        ]
+        var flags = physicalModifierFlags.union(currentModifierFlags)
+        if flags.contains(.maskCommand), flags.intersection(sides).isEmpty {
+            flags.insert(left)
+        }
+        let keysToPress = keys.filter { !flags.contains($0.side) }
+
+        for key in keysToPress {
+            flags.insert(.maskCommand)
+            flags.insert(key.side)
+            postCommandChange(code: key.code, down: true, flags: flags)
+        }
+        for key in keysToPress.reversed() {
+            flags.remove(key.side)
+            if flags.intersection(sides).isEmpty {
+                flags.remove(.maskCommand)
+            }
+            postCommandChange(code: key.code, down: false, flags: flags)
+        }
+    }
+
+    private func postCommandChange(code: CGKeyCode, down: Bool, flags: CGEventFlags) {
+        guard let event = CGEvent(keyboardEventSource: keyboardSource, virtualKey: code, keyDown: down) else { return }
+        event.type = .flagsChanged
+        event.flags = flags
+        post(event)
     }
 
     /// Key code for a stroke plus any flags the current layout needs to produce it.

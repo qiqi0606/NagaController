@@ -46,6 +46,8 @@ enum MediaKeyType: Int, Codable, CaseIterable {
 }
 
 struct KeyStroke: Equatable, Codable {
+    static let dualCommandIdentifier = "dual command"
+
     var key: String // canonical identifier (e.g., "c", "delete")
     var modifiers: [String] // e.g., ["cmd", "shift"]
     var keyCode: UInt16? = nil // hardware key code when known
@@ -60,6 +62,9 @@ extension KeyStroke {
     }
 
     func formattedShortcut() -> String {
+        if key == Self.dualCommandIdentifier {
+            return L10n.text("Left ⌘ + Right ⌘")
+        }
         let symbols = modifiers.map { KeyStroke.modifierSymbol(for: $0) }.joined()
         return symbols + displayLabel
     }

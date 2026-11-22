@@ -82,6 +82,7 @@
 "Launch at login" = "登录时启动";
 "Learn Hardware Trigger…" = "识别触发输入…";
 "Left Arrow" = "左方向键";
+"Left ⌘ + Right ⌘" = "左⌘ + 右⌘";
 "Listen-only mode" = "仅监听";
 "Macro" = "宏";
 "Manage Profiles" = "管理配置";

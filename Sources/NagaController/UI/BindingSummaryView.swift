@@ -2,7 +2,8 @@ import Cocoa
 
 final class BindingSummaryView: NSView {
     private let heading = NSTextField(labelWithString: "")
-    private var actionLabels: [Int: NSTextField] = [:]
+    private var actionLabels: [Int: (title: NSTextField, shortcut: NSTextField)] = [:]
+    private var mappingObserver: NSObjectProtocol?
 
     override init(frame frameRect: NSRect) {
         super.init(frame: frameRect)
@@ -45,10 +46,24 @@ final class BindingSummaryView: NSView {
             content.bottomAnchor.constraint(equalTo: card.bottomAnchor, constant: -10),
             heading.widthAnchor.constraint(lessThanOrEqualTo: content.widthAnchor)
         ])
+
+        mappingObserver = NotificationCenter.default.addObserver(
+            forName: ConfigManager.mappingsDidChangeNotification,
+            object: ConfigManager.shared,
+            queue: .main
+        ) { [weak self] _ in
+            self?.reload()
+        }
     }
 
     @available(*, unavailable)
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
+
+    deinit {
+        if let mappingObserver {
+            NotificationCenter.default.removeObserver(mappingObserver)
+        }
+    }
 
     private func makeCell(for slot: Int) -> NSStackView {
         let name = NSTextField(labelWithString: MappingLabels.button(slot))
@@ -60,14 +75,21 @@ final class BindingSummaryView: NSView {
         let action = NSTextField(labelWithString: "")
         action.font = .systemFont(ofSize: 11, weight: .semibold)
         action.lineBreakMode = .byTruncatingTail
-        actionLabels[slot] = action
 
-        let cell = NSStackView(views: [name, action])
+        let shortcut = NSTextField(labelWithString: "")
+        shortcut.font = .systemFont(ofSize: 10)
+        shortcut.textColor = .secondaryLabelColor
+        shortcut.lineBreakMode = .byTruncatingTail
+        shortcut.isHidden = true
+        actionLabels[slot] = (action, shortcut)
+
+        let cell = NSStackView(views: [name, action, shortcut])
         cell.orientation = .vertical
         cell.alignment = .leading
         cell.spacing = 1
         name.widthAnchor.constraint(lessThanOrEqualTo: cell.widthAnchor).isActive = true
         action.widthAnchor.constraint(lessThanOrEqualTo: cell.widthAnchor).isActive = true
+        shortcut.widthAnchor.constraint(lessThanOrEqualTo: cell.widthAnchor).isActive = true
         return cell
     }
 
@@ -77,16 +99,21 @@ final class BindingSummaryView: NSView {
         heading.toolTip = heading.stringValue
 
         let mappings = config.mappingForCurrentProfile()
-        for (slot, label) in actionLabels {
+        for (slot, labels) in actionLabels {
             let action = mappings[slot]
             let title = MappingLabels.action(action)
-            label.stringValue = title
+            labels.title.stringValue = title
+            let shortcut: String
             if case .keySequence(let keys, _)? = action {
-                let shortcut = keys.map { $0.formattedShortcut() }.joined(separator: ", ")
-                label.toolTip = shortcut.isEmpty || shortcut == title ? title : "\(title) · \(shortcut)"
+                shortcut = keys.map { $0.formattedShortcut() }.joined(separator: ", ")
             } else {
-                label.toolTip = title
+                shortcut = ""
             }
+            let showsShortcut = !shortcut.isEmpty && shortcut != title
+            labels.shortcut.stringValue = shortcut
+            labels.shortcut.isHidden = !showsShortcut
+            labels.shortcut.toolTip = shortcut
+            labels.title.toolTip = showsShortcut ? "\(title) · \(shortcut)" : title
         }
     }
 }

@@ -47,6 +47,7 @@ struct ButtonAction: Codable {
 final class ConfigManager {
     static let shared = ConfigManager()
     static let profileDidChangeNotification = Notification.Name("NagaController.profileDidChange")
+    static let mappingsDidChangeNotification = Notification.Name("NagaController.mappingsDidChange")
 
     private(set) var profiles: [String: Profile] = [:]
     private(set) var currentProfileName: String = "Default"
@@ -114,6 +115,7 @@ final class ConfigManager {
         ButtonMapper.shared.updateMapping(mappingForCurrentProfile())
         ButtonMapper.shared.updateHypershiftMapping(hypershiftMappingForCurrentProfile())
         NotificationCenter.default.post(name: ConfigManager.profileDidChangeNotification, object: self)
+        NotificationCenter.default.post(name: Self.mappingsDidChangeNotification, object: self)
     }
 
     func getRemappingEnabled() -> Bool {
@@ -453,6 +455,9 @@ final class ConfigManager {
 
     // Persist current profiles to Application Support
     func saveUserProfiles() {
+        defer {
+            NotificationCenter.default.post(name: Self.mappingsDidChangeNotification, object: self)
+        }
         do {
             let url = try userProfilesURL()
             try FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)

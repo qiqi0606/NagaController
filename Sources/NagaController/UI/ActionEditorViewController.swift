@@ -114,6 +114,7 @@ final class ActionEditorViewController: NSViewController {
 
         .header("Modifier Keys"),
         ShortcutPreset(name: "Command", key: "command", modifiers: [], isHeader: false),
+        ShortcutPreset(name: "Left ⌘ + Right ⌘", key: KeyStroke.dualCommandIdentifier, modifiers: [], isHeader: false),
         ShortcutPreset(name: "Shift", key: "shift", modifiers: [], isHeader: false),
         ShortcutPreset(name: "Option", key: "option", modifiers: [], isHeader: false),
         ShortcutPreset(name: "Control", key: "control", modifiers: [], isHeader: false),
@@ -770,6 +771,8 @@ final class ActionEditorViewController: NSViewController {
     }
 
     private func updateKeyFieldDisplay() {
+        let isDualCommand = recordedKeyIdentifier == KeyStroke.dualCommandIdentifier
+        [modCmd, modAlt, modCtrl, modShift].forEach { $0.isEnabled = !isDualCommand }
         if let identifier = recordedKeyIdentifier, !identifier.isEmpty {
             let mods = currentModifiers()
             let code = recordedKeyCode ?? KeyStroke.keyCode(for: identifier)
@@ -801,6 +804,7 @@ final class ActionEditorViewController: NSViewController {
     }
 
     private func currentModifiers() -> [String] {
+        guard recordedKeyIdentifier != KeyStroke.dualCommandIdentifier else { return [] }
         var result: [String] = []
         if modCmd.state == .on { result.append("cmd") }
         if modAlt.state == .on { result.append("alt") }
