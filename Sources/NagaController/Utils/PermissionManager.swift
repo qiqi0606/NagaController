@@ -5,10 +5,10 @@ final class PermissionManager {
     static let shared = PermissionManager()
     private init() {}
 
-    func ensureAccessibilityPermission() {
+    func ensureAccessibilityPermission(showPrompt: Bool = true) {
         let trusted = isProcessTrusted()
         NSLog("[Permissions] Accessibility trusted = \(trusted)")
-        guard !trusted else { return }
+        guard showPrompt, !trusted else { return }
         let key = "hasPromptedAccessibility"
         let hasPrompted = UserDefaults.standard.bool(forKey: key)
         let options = [kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String: !hasPrompted] as CFDictionary

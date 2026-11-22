@@ -31,6 +31,7 @@ final class MappingViewController: NSViewController {
     private var topConstraint: NSLayoutConstraint?
     private var backgroundGradient: CAGradientLayer?
     private var profileObserver: NSObjectProtocol?
+    private var batteryObserver: NSObjectProtocol?
 
     override func loadView() {
         self.view = NSView()
@@ -247,6 +248,14 @@ final class MappingViewController: NSViewController {
         topConstraint?.isActive = true
 
         refreshRows()
+        updateBatterySubtitle()
+        batteryObserver = NotificationCenter.default.addObserver(
+            forName: BatteryMonitor.didUpdateNotification,
+            object: BatteryMonitor.shared,
+            queue: .main
+        ) { [weak self] _ in
+            self?.updateBatterySubtitle()
+        }
 
         profileObserver = NotificationCenter.default.addObserver(
             forName: ConfigManager.profileDidChangeNotification,
@@ -261,6 +270,16 @@ final class MappingViewController: NSViewController {
         if let profileObserver {
             NotificationCenter.default.removeObserver(profileObserver)
         }
+        if let batteryObserver {
+            NotificationCenter.default.removeObserver(batteryObserver)
+        }
+    }
+
+    private func updateBatterySubtitle() {
+        let title = L10n.text("BUTTON MAPPING CONFIGURATION")
+        let battery = BatteryMonitor.shared.batteryLevel.map { L10n.text("Battery: %ld%%", $0) }
+            ?? L10n.text("Battery: —")
+        subHeaderLabel.stringValue = "\(title) · \(battery)"
     }
 
     override func viewDidAppear() {

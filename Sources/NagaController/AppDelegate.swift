@@ -12,8 +12,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     private var mainWindow: NSWindow?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        let opensMappingsInBackground = CommandLine.arguments.contains("--show-mappings-in-background")
+
         // Ensure Accessibility permissions
-        PermissionManager.shared.ensureAccessibilityPermission()
+        PermissionManager.shared.ensureAccessibilityPermission(showPrompt: !opensMappingsInBackground)
 
         // Load configuration (profiles, settings)
         ConfigManager.shared.load()
@@ -86,7 +88,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         // in Dock" preference switches the activation policy for anyone who wants it.
         AppDelegate.applyDockIconPreference()
         let firstLaunchKey = "NagaController.didShowFirstLaunchWindow"
-        if !UserDefaults.standard.bool(forKey: firstLaunchKey) {
+        if opensMappingsInBackground {
+            MappingWindowController.shared.show(activate: false)
+        } else if !UserDefaults.standard.bool(forKey: firstLaunchKey) {
             UserDefaults.standard.set(true, forKey: firstLaunchKey)
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
                 self?.showMainWindow()
@@ -95,7 +99,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
 
         // Start event tap based on persisted setting
         let remapEnabled = ConfigManager.shared.getRemappingEnabled()
-        eventTapManager.start(listenOnly: !remapEnabled)
+        eventTapManager.start(listenOnly: !remapEnabled, showPermissionPrompt: !opensMappingsInBackground)
     }
 
     func applicationWillTerminate(_ notification: Notification) {

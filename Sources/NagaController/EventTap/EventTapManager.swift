@@ -27,7 +27,7 @@ final class EventTapManager {
         learningCallback = callback
     }
 
-    func start(listenOnly: Bool) {
+    func start(listenOnly: Bool, showPermissionPrompt: Bool = true) {
         stop()
         isListeningOnly = listenOnly
 
@@ -75,7 +75,9 @@ final class EventTapManager {
                 userInfo: UnsafeMutableRawPointer(Unmanaged.passUnretained(self).toOpaque())
             )
             isListeningOnly = true
-            DispatchQueue.main.async { [weak self] in self?.promptForInputMonitoring() }
+            if showPermissionPrompt {
+                DispatchQueue.main.async { [weak self] in self?.promptForInputMonitoring() }
+            }
         }
         
         guard let tap = tap else {

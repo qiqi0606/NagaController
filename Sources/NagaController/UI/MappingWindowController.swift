@@ -33,8 +33,15 @@ final class MappingWindowController: NSWindowController, NSWindowDelegate {
     @available(*, unavailable)
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
 
-    func show() {
+    func show(activate: Bool = true) {
         guard let window else { return }
+
+        window.delegate = self
+        window.center()
+        guard activate else {
+            window.orderBack(nil)
+            return
+        }
 
         previousActivationPolicy = nil
         let currentPolicy = NSApp.activationPolicy()
@@ -43,8 +50,6 @@ final class MappingWindowController: NSWindowController, NSWindowDelegate {
             NSApp.setActivationPolicy(.regular)
         }
 
-        window.delegate = self
-        window.center()
         showWindow(nil)
         NSApp.activate(ignoringOtherApps: true)
     }
