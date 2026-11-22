@@ -23,6 +23,7 @@ final class MainViewController: NSViewController {
     }()
 
     private let batteryGlass = GlassyBatteryView()
+    private let bindingSummary = BindingSummaryView(frame: .zero)
 
     private let toggle = NSButton(checkboxWithTitle: L10n.text("Enable remapping (blocks original keys)"), target: nil, action: nil)
     private let launchAtLoginToggle = NSButton(checkboxWithTitle: L10n.text("Launch at login"), target: nil, action: nil)
@@ -85,7 +86,7 @@ final class MainViewController: NSViewController {
         
         let container = NSStackView()
         container.orientation = .vertical
-        container.spacing = 20
+        container.spacing = 14
         container.alignment = .centerX
         container.edgeInsets = NSEdgeInsets(top: 24, left: 24, bottom: 24, right: 24)
         container.translatesAutoresizingMaskIntoConstraints = false
@@ -125,6 +126,7 @@ final class MainViewController: NSViewController {
         headerStack.alignment = .centerX
 
         container.addArrangedSubview(headerStack)
+        container.addArrangedSubview(bindingSummary)
 
         // 2. Actions Section (in a card)
         let actionsCard = UIStyle.makeCard()
@@ -239,6 +241,11 @@ final class MainViewController: NSViewController {
             self?.showUpdateBanner(version: note.object as? String)
         }
         showUpdateBanner(version: UpdateChecker.shared.availableVersion)
+    }
+
+    override func viewWillAppear() {
+        super.viewWillAppear()
+        bindingSummary.reload()
     }
 
     @objc private func toggleChanged(_ sender: NSButton) {

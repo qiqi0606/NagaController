@@ -14,6 +14,7 @@
 "BUTTON MAPPING CONFIGURATION" = "按键绑定";
 "Battery: %ld%%" = "电量：%ld%%";
 "Battery: —" = "电量：—";
+"Button quick reference · %@" = "按键速查 · %@";
 "Brightness Down" = "降低亮度";
 "Brightness Up" = "提高亮度";
 "Browse…" = "浏览…";

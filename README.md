@@ -8,6 +8,10 @@ A macOS menu bar app to remap the 12 side buttons of the Razer Naga V2 Hyperspee
 
 ## Changelog / 更新日志
 
+### 2026-11-23 · `zh-hans`
+
+- 点击菜单栏图标即可速查当前配置的侧键、DPI 和滚轮绑定。
+
 ### 2026-11-22 · `zh-hans`
 
 - 缩小按键绑定页的侧键、DPI 和滚轮卡片，在页首显示电量。
@@ -24,6 +28,7 @@ A macOS menu bar app to remap the 12 side buttons of the Razer Naga V2 Hyperspee
   - Simple macros
   - Profile switching
 - Toggle remapping ON/OFF from the menu bar
+- View the current button assignments directly in the menu bar popover
 - Configure mappings in a dedicated window
 - Test a mapping instantly from the editor, without pressing the physical button
 - Battery percentage via Bluetooth (UUID 0x180F / 0x2A19) or the Naga V2 HyperSpeed USB receiver

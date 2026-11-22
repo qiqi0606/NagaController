@@ -376,7 +376,7 @@ final class MappingViewController: NSViewController {
         v.translatesAutoresizingMaskIntoConstraints = false
 
         // Title row with big button number and profile-colored accent
-        let title = NSTextField(labelWithString: displayName(for: index).uppercased())
+        let title = NSTextField(labelWithString: MappingLabels.button(index).uppercased())
         title.font = .systemFont(ofSize: 10, weight: .black)
         title.textColor = NSColor.white.withAlphaComponent(0.3)
 
@@ -411,8 +411,8 @@ final class MappingViewController: NSViewController {
         let clear = NSButton(title: "", target: nil, action: nil)
         clear.image = UIStyle.symbol("trash", size: 12, weight: .medium)
         clear.imagePosition = .imageOnly
-        clear.toolTip = L10n.text("Reset mapping for %@", displayName(for: index))
-        clear.setAccessibilityLabel(L10n.text("Reset mapping for %@", displayName(for: index)))
+        clear.toolTip = L10n.text("Reset mapping for %@", MappingLabels.button(index))
+        clear.setAccessibilityLabel(L10n.text("Reset mapping for %@", MappingLabels.button(index)))
         clear.tag = index
         clear.target = self
         clear.action = #selector(clearTapped(_:))
@@ -455,17 +455,6 @@ final class MappingViewController: NSViewController {
         return card
     }
 
-    private func displayName(for index: Int) -> String {
-        switch index {
-        case 13: return L10n.text("DPI Up")
-        case 14: return L10n.text("DPI Down")
-        case 15: return L10n.text("Wheel Tilt Left")
-        case 16: return L10n.text("Wheel Tilt Right")
-        case 17: return L10n.text("Wheel Click")
-        default: return L10n.text("Button %ld", index)
-        }
-    }
-
     private func addHover(to view: NSView) {
         view.wantsLayer = true
         let area = NSTrackingArea(rect: .zero, options: [.mouseEnteredAndExited, .activeInActiveApp, .inVisibleRect], owner: self, userInfo: ["card": view])
@@ -475,7 +464,7 @@ final class MappingViewController: NSViewController {
     private func refreshRows() {
         let mapping = isHypershiftView ? ConfigManager.shared.hypershiftMappingForCurrentProfile() : ConfigManager.shared.mappingForCurrentProfile()
         for i in 1...17 {
-            let description = actionDescription(mapping[i])
+            let description = MappingLabels.action(mapping[i])
             descLabels[i]?.stringValue = description
             descLabels[i]?.toolTip = description
         }
@@ -486,31 +475,6 @@ final class MappingViewController: NSViewController {
         
         headerLabel.stringValue = ConfigManager.shared.currentProfileName
         reloadProfilesPopup()
-    }
-
-    private func actionDescription(_ action: ActionType?) -> String {
-        guard let action = action else { return L10n.text("(Unassigned)") }
-        switch action {
-        case .keySequence(let keys, let d):
-            let ks = keys.map { $0.formattedShortcut() }.joined(separator: ", ")
-            return d ?? ks
-        case .application(let path, let d):
-            return d ?? L10n.text("App: %@", URL(fileURLWithPath: path).lastPathComponent)
-        case .systemCommand(let cmd, let d):
-            return d ?? L10n.text("Script: %@", cmd)
-        case .textSnippet(let text, let d):
-            let preview = text.replacingOccurrences(of: "\n", with: " ⏎ ")
-            let truncated = preview.count > 40 ? String(preview.prefix(37)) + "…" : preview
-            return d ?? L10n.text("Text: %@", truncated)
-        case .macro(_, let d):
-            return d ?? L10n.text("Macro")
-        case .profileSwitch(let p, let d):
-            return d ?? L10n.text("Profile: %@", p)
-        case .hypershift:
-            return L10n.text("Hypershift Modifier")
-        case .mediaKey(let key, let d):
-            return d ?? key.label
-        }
     }
 
     @objc private func hypershiftToggleTapped(_ sender: NSButton) {
