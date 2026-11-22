@@ -21,7 +21,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         // Start HID listener (filters Naga device presses)
         _ = HIDListener.shared
 
-        // Start Bluetooth battery monitoring (BLE Battery Service 0x180F)
+        // Start battery monitoring for the USB receiver and Bluetooth.
         BatteryMonitor.shared.start()
 
         // Fire-and-forget: at most once a day, posts a notification if a newer release

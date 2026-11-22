@@ -10,15 +10,12 @@ final class BatteryMonitor: NSObject, CBCentralManagerDelegate, CBPeripheralDele
     private var target: CBPeripheral?
     private var batteryCharacteristic: CBCharacteristic?
     private var retryWorkItem: DispatchWorkItem?
+    private var usbPollTimer: DispatchSourceTimer?
+    private var usbBatteryLevel: Int?
+    private var bluetoothBatteryLevel: Int?
 
-    // Latest battery percentage 0-100
-    private(set) var batteryLevel: Int? {
-        didSet {
-            DispatchQueue.main.async {
-                NotificationCenter.default.post(name: BatteryMonitor.didUpdateNotification, object: self)
-            }
-        }
-    }
+    // UI state, read and updated on the main queue.
+    private(set) var batteryLevel: Int?
 
     // Heuristic to pick the right device when multiple peripherals expose 0x180F
     private let preferredNameSubstrings = ["naga", "razer"]
@@ -32,7 +29,16 @@ final class BatteryMonitor: NSObject, CBCentralManagerDelegate, CBPeripheralDele
 
     func start() {
         queue.async { [weak self] in
-            guard let self = self else { return }
+            guard let self, self.usbPollTimer == nil else { return }
+            let timer = DispatchSource.makeTimerSource(queue: self.queue)
+            timer.schedule(deadline: .now(), repeating: .seconds(60), leeway: .seconds(5))
+            timer.setEventHandler { [weak self] in
+                guard let self else { return }
+                self.usbBatteryLevel = USBBatteryReader.readPercentage()
+                self.publishBatteryLevel()
+            }
+            self.usbPollTimer = timer
+            timer.resume()
             if self.central.state == .poweredOn {
                 self.startScan()
             }
@@ -42,12 +48,27 @@ final class BatteryMonitor: NSObject, CBCentralManagerDelegate, CBPeripheralDele
     func stop() {
         queue.async { [weak self] in
             guard let self = self else { return }
+            self.usbPollTimer?.cancel()
+            self.usbPollTimer = nil
+            self.cancelRetry()
             if let t = self.target {
                 self.central.cancelPeripheralConnection(t)
             }
             self.central.stopScan()
             self.target = nil
             self.batteryCharacteristic = nil
+            self.usbBatteryLevel = nil
+            self.bluetoothBatteryLevel = nil
+            self.publishBatteryLevel()
+        }
+    }
+
+    private func publishBatteryLevel() {
+        let level = usbBatteryLevel ?? bluetoothBatteryLevel
+        DispatchQueue.main.async { [weak self] in
+            guard let self, self.batteryLevel != level else { return }
+            self.batteryLevel = level
+            NotificationCenter.default.post(name: BatteryMonitor.didUpdateNotification, object: self)
         }
     }
 
@@ -76,7 +97,8 @@ final class BatteryMonitor: NSObject, CBCentralManagerDelegate, CBPeripheralDele
             // Clear state if BT turned off, etc.
             target = nil
             batteryCharacteristic = nil
-            batteryLevel = nil
+            bluetoothBatteryLevel = nil
+            publishBatteryLevel()
         }
     }
 
@@ -132,7 +154,8 @@ final class BatteryMonitor: NSObject, CBCentralManagerDelegate, CBPeripheralDele
         if peripheral == target {
             target = nil
             batteryCharacteristic = nil
-            batteryLevel = nil
+            bluetoothBatteryLevel = nil
+            publishBatteryLevel()
             NSLog("[BLE] Disconnected: \(error?.localizedDescription ?? "<no error>") — restarting scan")
             cancelRetry()
             startScan()
@@ -195,8 +218,9 @@ final class BatteryMonitor: NSObject, CBCentralManagerDelegate, CBPeripheralDele
         guard error == nil else { NSLog("[BLE] didUpdateValue error: \(error!.localizedDescription)"); return }
         if characteristic.uuid == CBUUID(string: "2A19"), let data = characteristic.value, let first = data.first {
             let percent = Int(first)
-            batteryLevel = max(0, min(100, percent))
-            NSLog("[BLE] Battery Level updated: \(batteryLevel ?? -1)%")
+            bluetoothBatteryLevel = max(0, min(100, percent))
+            publishBatteryLevel()
+            NSLog("[BLE] Battery Level updated: \(bluetoothBatteryLevel ?? -1)%")
             cancelRetry()
         }
     }
@@ -206,7 +230,7 @@ final class BatteryMonitor: NSObject, CBCentralManagerDelegate, CBPeripheralDele
         cancelRetry()
         let item = DispatchWorkItem { [weak self, weak peripheral] in
             guard let self = self, let p = peripheral else { return }
-            if self.batteryLevel == nil && self.batteryCharacteristic == nil {
+            if self.bluetoothBatteryLevel == nil && self.batteryCharacteristic == nil {
                 NSLog("[BLE] Discovery timeout — retrying service discovery or reconnect")
                 let batteryService = CBUUID(string: "180F")
                 if p.state == .connected {

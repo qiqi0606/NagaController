@@ -2,9 +2,18 @@
 
 [![GitHub stars](https://img.shields.io/github/stars/DParent10/NagaController?style=social)](https://github.com/DParent10/NagaController)
 
-A macOS menu bar app to remap the 12 side buttons of the Razer Naga V2 Hyperspeed. Intercepts the default 1–0–=– key events and maps them to actions like key sequences, app launching, and macros. Includes Bluetooth battery level display.
+A macOS menu bar app to remap the 12 side buttons of the Razer Naga V2 Hyperspeed. Intercepts the default 1–0–=– key events and maps them to actions like key sequences, app launching, and macros. Displays battery level over Bluetooth and the supported HyperSpeed USB receiver.
 
-**[⬇️ Download Latest Release (v0.2.3)](https://github.com/DParent10/NagaController/releases/latest)**
+**[⬇️ Download Latest Upstream Release (v0.2.3)](https://github.com/DParent10/NagaController/releases/latest)**
+
+## Changelog / 更新日志
+
+### 2026-11-22 · `zh-hans`
+
+- 新增 Naga V2 HyperSpeed 2.4 GHz USB 接收器的电量读取。应用启动时读取，之后约每分钟刷新，沿用已有的「输入监控」权限。
+- 新增简体中文界面。
+
+以上更新可通过[本分支源码构建](#build-from-source)获得。
 
 ## Features
 
@@ -16,7 +25,7 @@ A macOS menu bar app to remap the 12 side buttons of the Razer Naga V2 Hyperspee
 - Toggle remapping ON/OFF from the menu bar
 - Configure mappings in a dedicated window
 - Test a mapping instantly from the editor, without pressing the physical button
-- Battery percentage display via Bluetooth (UUID 0x180F / 0x2A19)
+- Battery percentage via Bluetooth (UUID 0x180F / 0x2A19) or the Naga V2 HyperSpeed USB receiver
 - Launch at login, and an optional Dock icon (the app is menu-bar only by default)
 - Notifies you in the app window when a newer release is available. This checks GitHub's releases API at most once a day; nothing is downloaded or sent beyond that request.
 - Warns before importing a profile that runs shell commands
@@ -26,7 +35,7 @@ A macOS menu bar app to remap the 12 side buttons of the Razer Naga V2 Hyperspee
 
 - macOS 13.0 or later
 - Razer Naga V2 Hyperspeed (other Naga models may work; device matching by vendor/product name is included)
-- Bluetooth enabled (for battery reporting)
+- Bluetooth enabled when using Bluetooth battery reporting
 
 ## Installation
 
@@ -46,12 +55,12 @@ See the [user guide](USER-GUIDE.md) for shortcuts, profile switching, Hypershift
 
 - **Accessibility**: System Settings → Privacy & Security → Accessibility → enable "NagaController"
 - **Input Monitoring**: System Settings → Privacy & Security → Input Monitoring → enable "NagaController", then quit and reopen the app
-- **Bluetooth (battery)**: System Settings → Privacy & Security → Bluetooth → allow "NagaController"
+- **Bluetooth battery reporting**: System Settings → Privacy & Security → Bluetooth → allow "NagaController"
 - **Tip**: Always launch the same `.app` you granted permissions to (avoid running other binaries) so permissions persist
 
 ## Known limitations
 
-- Battery percentage works over Bluetooth (BLE) only; vendor 2.4GHz dongles typically don't expose battery via public APIs
+- USB battery reporting currently supports the Naga V2 HyperSpeed receiver (`1532:00b4`).
 
 ## Supported Devices
 
@@ -85,30 +94,26 @@ See the [user guide](USER-GUIDE.md) for shortcuts, profile switching, Hypershift
    - If the mouse was customised in Razer Synapse on Windows, reset its on-board profile there first (see the user guide)
    - Paste the relevant `[HID] DISCOVERY` and `[HID] Mapped` lines into an issue so we can whitelist your device if needed
 
-## Battery (Bluetooth)
+## Battery
 
 NagaController can show your mouse battery percentage when the mouse is connected over Bluetooth (BLE). It uses the standard Battery Service (UUID `0x180F`) and Battery Level characteristic (`0x2A19`).
 
-This does not work over the HyperSpeed 2.4GHz dongle — most vendor dongles do not expose battery via public APIs.
+For the Naga V2 HyperSpeed USB receiver (`1532:00b4`), NagaController also reads the percentage over USB using its existing Input Monitoring permission.
 
 ### How it works
 
-- On launch, the app requests Bluetooth permission and then:
+- The app checks the USB receiver on launch and refreshes it roughly once a minute. A valid USB reading takes priority over Bluetooth.
+- For Bluetooth, the app uses its Bluetooth permission and then:
   - Tries `retrieveConnectedPeripherals(withServices: [0x180F])` to attach to already-connected devices
   - Falls back to scanning for devices that advertise `0x180F` or whose name contains "Razer"/"Naga"
 - Once connected, it reads Battery Level and subscribes for updates
 - The battery percentage is displayed in the menu bar title and in the popover. At 20% or lower, the popover label turns red and a local notification is shown
 
-### Requirements
-
-- System Settings → Privacy & Security → Bluetooth → allow "NagaController"
-- Connect your mouse via Bluetooth and ensure it's awake
-
 ### If you see "Battery: —"
 
-- Ensure the device is connected over Bluetooth (not via the HyperSpeed dongle)
-- Wake the mouse (move/click) and re-open the popover
-- Launch from Terminal to see BLE diagnostics
+- Wake the mouse and allow up to a minute for the next USB reading.
+- For the Naga V2 HyperSpeed receiver, check Input Monitoring under System Settings → Privacy & Security.
+- For Bluetooth, check the Bluetooth permission under System Settings → Privacy & Security.
 
 ## Build from source
 
