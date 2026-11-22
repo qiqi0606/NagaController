@@ -12,6 +12,7 @@ A macOS menu bar app to remap the 12 side buttons of the Razer Naga V2 Hyperspee
 
 - 点击菜单栏图标即可速查当前配置的侧键、DPI 和滚轮绑定。
 - 速查随配置更新，显示动作名称和实际快捷键。快捷键预设支持左、右 Command 同按。
+- 点击桌面或其他 App 时，自动收起菜单栏速查。
 
 ### 2026-11-22 · `zh-hans`
 

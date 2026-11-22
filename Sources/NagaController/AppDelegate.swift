@@ -1,9 +1,10 @@
 import Cocoa
 import UserNotifications
 
-final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
+final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, NSPopoverDelegate {
     private var statusItem: NSStatusItem!
     private let popover = NSPopover()
+    private var popoverClickMonitor: Any?
     private let eventTapManager = EventTapManager.shared
     private var batteryObserver: NSObjectProtocol?
     private var profileObserver: NSObjectProtocol?
@@ -61,6 +62,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
 
         // Popover content
         popover.behavior = .transient
+        popover.delegate = self
         if #available(macOS 10.14, *) {
             popover.appearance = NSAppearance(named: .vibrantDark)
         }
@@ -104,6 +106,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
 
     func applicationWillTerminate(_ notification: Notification) {
         eventTapManager.stop()
+        stopMonitoringPopoverClicks()
         if let profileObserver { NotificationCenter.default.removeObserver(profileObserver) }
     }
 
@@ -155,6 +158,43 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             }
             popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
         }
+    }
+
+    func popoverWillShow(_ notification: Notification) {
+        guard popoverClickMonitor == nil else { return }
+        // A menu-bar app can show its popover while another app still owns focus.
+        // Observe outside clicks without intercepting them or activating this app.
+        popoverClickMonitor = NSEvent.addGlobalMonitorForEvents(
+            matching: [.leftMouseDown, .rightMouseDown, .otherMouseDown]
+        ) { [weak self] event in
+            self?.dismissPopoverOnOutsideClick(event)
+        }
+    }
+
+    func popoverDidClose(_ notification: Notification) {
+        stopMonitoringPopoverClicks()
+    }
+
+    private func stopMonitoringPopoverClicks() {
+        guard let monitor = popoverClickMonitor else { return }
+        NSEvent.removeMonitor(monitor)
+        popoverClickMonitor = nil
+    }
+
+    private func dismissPopoverOnOutsideClick(_ event: NSEvent) {
+        guard popover.isShown else { return }
+        let location = event.window?.convertPoint(toScreen: event.locationInWindow)
+            ?? event.locationInWindow
+
+        if popover.contentViewController?.view.window?.frame.contains(location) == true {
+            return
+        }
+        if let button = statusItem.button, let window = button.window {
+            let buttonFrame = window.convertToScreen(button.convert(button.bounds, to: nil))
+            // Let the status button's own action handle a repeat click.
+            if buttonFrame.contains(location) { return }
+        }
+        popover.performClose(nil)
     }
 
     private func handleBatteryUpdate() {
