@@ -55,8 +55,8 @@ final class ActionEditorViewController: NSViewController {
     private let onComplete: () -> Void
     private var initialRemappingState: Bool = false
     
-    private let segmented = NSSegmentedControl(labels: ["Key", "App", "Cmd", "Text", "Profile", "macOS", "Hypershift"], trackingMode: .selectOne, target: nil, action: nil)
-    private let layerSegmented = NSSegmentedControl(labels: ["Standard Layer", "Hypershift Layer"], trackingMode: .selectOne, target: nil, action: nil)
+    private let segmented = NSSegmentedControl(labels: [L10n.text("Key"), L10n.text("App"), L10n.text("Cmd"), L10n.text("Text"), L10n.text("Profile"), "macOS", "Hypershift"], trackingMode: .selectOne, target: nil, action: nil)
+    private let layerSegmented = NSSegmentedControl(labels: [L10n.text("Standard Layer"), L10n.text("Hypershift Layer")], trackingMode: .selectOne, target: nil, action: nil)
     
     // Temporary storage for edits before saving
     private var tempStandardAction: ActionType?
@@ -131,8 +131,8 @@ final class ActionEditorViewController: NSViewController {
     private let contentStack = NSStackView()
     
     // Hardware Learning
-    private let hardwareBindingLabel = NSTextField(labelWithString: "Trigger: (Default)")
-    private let learnButton = NSButton(title: "Learn Hardware Trigger…", target: nil, action: nil)
+    private let hardwareBindingLabel = NSTextField(labelWithString: L10n.text("Trigger: (Default)"))
+    private let learnButton = NSButton(title: L10n.text("Learn Hardware Trigger…"), target: nil, action: nil)
     private let clearHardwareButton = NSButton(title: "", target: nil, action: nil)
     private var isLearningHardware = false
     private var isCoolingDown = false
@@ -140,7 +140,7 @@ final class ActionEditorViewController: NSViewController {
 
     // Hypershift mode picker (hold / toggle)
     private let hypershiftModeSegmented = NSSegmentedControl(
-        labels: ["Hold to Activate", "Click to Toggle"],
+        labels: [L10n.text("Hold to Activate"), L10n.text("Click to Toggle")],
         trackingMode: .selectOne, target: nil, action: nil
     )
 
@@ -187,7 +187,7 @@ final class ActionEditorViewController: NSViewController {
             container.bottomAnchor.constraint(equalTo: glassyView.bottomAnchor)
         ])
 
-        let header = NSTextField(labelWithString: "Edit Action — Button \(buttonIndex)")
+        let header = NSTextField(labelWithString: L10n.text("Edit Action — Button %ld", buttonIndex))
         header.font = .systemFont(ofSize: 22, weight: .bold)
         header.textColor = UIStyle.razerGreen
         
@@ -200,15 +200,15 @@ final class ActionEditorViewController: NSViewController {
         segmented.selectedSegment = 0
 
         // Description
-        let descLabel = NSTextField(labelWithString: "Label / Description:")
+        let descLabel = NSTextField(labelWithString: L10n.text("Label / Description:"))
         descLabel.font = .systemFont(ofSize: 11, weight: .black)
         descLabel.textColor = NSColor.white.withAlphaComponent(0.3)
-        descriptionField.placeholderString = "e.g. Copy, Open App, Paste"
+        descriptionField.placeholderString = L10n.text("e.g. Copy, Open App, Paste")
         descriptionField.focusRingType = .none
 
         // Key UI
         keyField.translatesAutoresizingMaskIntoConstraints = false
-        keyField.placeholderString = "Press a key..."
+        keyField.placeholderString = L10n.text("Press a key...")
         keyField.alignment = .center
         keyField.isEditable = false
         keyField.drawsBackground = false
@@ -248,38 +248,39 @@ final class ActionEditorViewController: NSViewController {
             button.font = .systemFont(ofSize: 14, weight: .medium)
         }
 
-        let keyRow = NSStackView(views: [NSTextField(labelWithString: "Key:"), keyFieldContainer])
+        let keyRow = NSStackView(views: [NSTextField(labelWithString: L10n.text("Key:")), keyFieldContainer])
         keyRow.spacing = 12
         keyRow.alignment = .centerY
         
-        presetsPopup.addItem(withTitle: "Quick Presets…")
-        for p in presets {
-            if p.isHeader {
+        presetsPopup.addItem(withTitle: L10n.text("Quick Presets…"))
+        for (index, preset) in presets.enumerated() {
+            if preset.isHeader {
                 presetsPopup.menu?.addItem(NSMenuItem.separator())
-                let item = NSMenuItem(title: p.name, action: nil, keyEquivalent: "")
+                let item = NSMenuItem(title: L10n.text(preset.name), action: nil, keyEquivalent: "")
                 item.isEnabled = false
                 presetsPopup.menu?.addItem(item)
             } else {
-                presetsPopup.addItem(withTitle: p.name)
+                presetsPopup.addItem(withTitle: L10n.text(preset.name))
+                presetsPopup.lastItem?.representedObject = index
             }
         }
         presetsPopup.target = self
         presetsPopup.action = #selector(presetSelected)
         
-        let modsRow = NSStackView(views: [NSTextField(labelWithString: "Modifiers:"), modCmd, modAlt, modCtrl, modShift, NSView(), presetsPopup])
+        let modsRow = NSStackView(views: [NSTextField(labelWithString: L10n.text("Modifiers:")), modCmd, modAlt, modCtrl, modShift, NSView(), presetsPopup])
         modsRow.spacing = 10
         modsRow.alignment = .centerY
 
-        let keyHint = NSTextField(labelWithString: "Focus the capture box, then press your shortcut.")
+        let keyHint = NSTextField(labelWithString: L10n.text("Focus the capture box, then press your shortcut."))
         keyHint.font = .systemFont(ofSize: 11)
         keyHint.textColor = NSColor.white.withAlphaComponent(0.4)
         
-        let keyGroup = group("Key Sequence", views: [keyRow, modsRow, keyHint])
+        let keyGroup = group(L10n.text("Key Sequence"), views: [keyRow, modsRow, keyHint])
 
         // App UI
         appPath.url = nil
         appPath.pathStyle = .standard
-        let browse = NSButton(title: "Browse…", target: self, action: #selector(browseApp))
+        let browse = NSButton(title: L10n.text("Browse…"), target: self, action: #selector(browseApp))
         browse.image = UIStyle.symbol("folder", size: 13)
         browse.imagePosition = .imageLeading
         UIStyle.styleSecondaryButton(browse)
@@ -289,18 +290,18 @@ final class ActionEditorViewController: NSViewController {
         
         appPath.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
         
-        let appRow = NSStackView(views: [NSTextField(labelWithString: "Path:"), appPath, browse])
+        let appRow = NSStackView(views: [NSTextField(labelWithString: L10n.text("Path:")), appPath, browse])
         appRow.spacing = 12
         appRow.alignment = .centerY
-        let appGroup = group("Application", views: [appRow])
+        let appGroup = group(L10n.text("Application"), views: [appRow])
 
         // Command UI
-        commandField.placeholderString = "e.g. say Hello or osascript …"
+        commandField.placeholderString = L10n.text("e.g. say Hello or osascript …")
         commandField.font = .monospacedSystemFont(ofSize: 13, weight: .regular)
-        let cmdRow = NSStackView(views: [NSTextField(labelWithString: "Script:"), commandField])
+        let cmdRow = NSStackView(views: [NSTextField(labelWithString: L10n.text("Script:")), commandField])
         cmdRow.spacing = 12
         cmdRow.alignment = .centerY
-        let cmdGroup = group("System Command", views: [cmdRow])
+        let cmdGroup = group(L10n.text("System Command"), views: [cmdRow])
 
         // Text Snippet UI
         textSnippetView.isAutomaticQuoteSubstitutionEnabled = false
@@ -319,15 +320,15 @@ final class ActionEditorViewController: NSViewController {
         textSnippetScroll.translatesAutoresizingMaskIntoConstraints = false
         textSnippetScroll.heightAnchor.constraint(equalToConstant: 140).isActive = true
 
-        let textGroup = group("Text Snippet", views: [textSnippetScroll])
+        let textGroup = group(L10n.text("Text Snippet"), views: [textSnippetScroll])
 
         // Profile UI
-        let profLabel = NSTextField(labelWithString: "Profile:")
+        let profLabel = NSTextField(labelWithString: L10n.text("Profile:"))
         profilePopup.addItems(withTitles: ConfigManager.shared.availableProfiles())
         let profRow = NSStackView(views: [profLabel, profilePopup])
         profRow.spacing = 12
         profRow.alignment = .centerY
-        let profGroup = group("Profile Switch", views: [profRow])
+        let profGroup = group(L10n.text("Profile Switch"), views: [profRow])
 
         // macOS / Media UI
         for caseType in MediaKeyType.allCases {
@@ -336,19 +337,19 @@ final class ActionEditorViewController: NSViewController {
         macosPopup.action = #selector(macosPresetSelected)
         macosPopup.target = self
         
-        let macosRow = NSStackView(views: [NSTextField(labelWithString: "Select Action:"), macosPopup])
+        let macosRow = NSStackView(views: [NSTextField(labelWithString: L10n.text("Select Action:")), macosPopup])
         macosRow.spacing = 12
         macosRow.alignment = .centerY
-        let macosGroup = group("macOS / Media Keys", views: [macosRow])
+        let macosGroup = group(L10n.text("macOS / Media Keys"), views: [macosRow])
 
         // Hypershift UI
-        let hsHint = NSTextField(labelWithString: "This button unlocks the Hypershift layer. Choose how it activates below:")
+        let hsHint = NSTextField(labelWithString: L10n.text("This button unlocks the Hypershift layer. Choose how it activates below:"))
         hsHint.font = .systemFont(ofSize: 12)
         hsHint.textColor = NSColor.white.withAlphaComponent(0.6)
         hsHint.lineBreakMode = .byWordWrapping
         hsHint.maximumNumberOfLines = 3
 
-        let hsModeLabel = NSTextField(labelWithString: "Activation Mode:")
+        let hsModeLabel = NSTextField(labelWithString: L10n.text("Activation Mode:"))
         hsModeLabel.font = .systemFont(ofSize: 11, weight: .black)
         hsModeLabel.textColor = NSColor.white.withAlphaComponent(0.3)
         hypershiftModeSegmented.selectedSegment = 0 // default: hold
@@ -357,7 +358,7 @@ final class ActionEditorViewController: NSViewController {
         hsModeRow.spacing = 12
         hsModeRow.alignment = .centerY
 
-        let hsGroup = group("Hypershift Active", views: [hsHint, hsModeRow])
+        let hsGroup = group(L10n.text("Hypershift Active"), views: [hsHint, hsModeRow])
 
         // Content stack
         contentStack.orientation = .vertical
@@ -374,7 +375,7 @@ final class ActionEditorViewController: NSViewController {
         buttonsStack.orientation = .horizontal
         buttonsStack.spacing = 12
         
-        cancelButton = NSButton(title: "Cancel", target: self, action: #selector(cancelTapped))
+        cancelButton = NSButton(title: L10n.text("Cancel"), target: self, action: #selector(cancelTapped))
         cancelButton.image = UIStyle.symbol("xmark", size: 14)
         cancelButton.imagePosition = .imageLeading
         cancelButton.keyEquivalent = "\u{1b}"
@@ -382,7 +383,7 @@ final class ActionEditorViewController: NSViewController {
         cancelButton.widthAnchor.constraint(equalToConstant: 100).isActive = true
         cancelButton.heightAnchor.constraint(equalToConstant: 36).isActive = true
 
-        saveButton = NSButton(title: "Save", target: self, action: #selector(saveTapped))
+        saveButton = NSButton(title: L10n.text("Save"), target: self, action: #selector(saveTapped))
         saveButton.image = UIStyle.symbol("checkmark.circle.fill", size: 14, weight: .bold)
         saveButton.imagePosition = .imageLeading
         saveButton.keyEquivalent = "\r"
@@ -390,10 +391,10 @@ final class ActionEditorViewController: NSViewController {
         saveButton.widthAnchor.constraint(equalToConstant: 100).isActive = true
         saveButton.heightAnchor.constraint(equalToConstant: 36).isActive = true
 
-        testButton = NSButton(title: "Test", target: self, action: #selector(testTapped))
+        testButton = NSButton(title: L10n.text("Test"), target: self, action: #selector(testTapped))
         testButton.image = UIStyle.symbol("play.fill", size: 12, weight: .bold)
         testButton.imagePosition = .imageLeading
-        testButton.toolTip = "Run this action once, right now, without pressing the mouse button"
+        testButton.toolTip = L10n.text("Run this action once, right now, without pressing the mouse button")
         UIStyle.styleSecondaryButton(testButton)
         testButton.widthAnchor.constraint(equalToConstant: 90).isActive = true
         testButton.heightAnchor.constraint(equalToConstant: 36).isActive = true
@@ -418,7 +419,7 @@ final class ActionEditorViewController: NSViewController {
 
         // The hardware trigger row gets its own line: sharing the Cancel/Save row left
         // the "Trigger:" label with no room and it was truncated to nothing.
-        let hardwareCaption = NSTextField(labelWithString: "HARDWARE TRIGGER")
+        let hardwareCaption = NSTextField(labelWithString: L10n.text("HARDWARE TRIGGER"))
         hardwareCaption.font = .systemFont(ofSize: 11, weight: .black)
         hardwareCaption.textColor = NSColor.white.withAlphaComponent(0.3)
         let hardwareStack = NSStackView(views: [learnButton, clearHardwareButton, hardwareBindingLabel, NSView()])
@@ -825,11 +826,10 @@ final class ActionEditorViewController: NSViewController {
     }
 
     @objc private func presetSelected() {
-        let title = presetsPopup.titleOfSelectedItem
-        presetsPopup.selectItem(at: 0) // Reset to "Presets..."
-        
-        guard let title = title, title != "Quick Presets…" else { return }
-        guard let preset = presets.first(where: { $0.name == title && !$0.isHeader }) else { return }
+        let index = presetsPopup.selectedItem?.representedObject as? Int
+        presetsPopup.selectItem(at: 0)
+        guard let index, presets.indices.contains(index) else { return }
+        let preset = presets[index]
         
         recordedKeyIdentifier = preset.key
         recordedKeyCode = KeyStroke.keyCode(for: preset.key)
@@ -856,7 +856,7 @@ final class ActionEditorViewController: NSViewController {
 
     @objc private func learnHardwareTapped() {
         isLearningHardware = true
-        learnButton.title = "Press a button now..."
+        learnButton.title = L10n.text("Press a button now...")
         learnButton.isEnabled = false
         
         pendingUsagePage = nil
@@ -918,7 +918,7 @@ final class ActionEditorViewController: NSViewController {
         HIDListener.shared.setLearningCallback(nil)
         EventTapManager.shared.setLearningCallback(nil)
         isLearningHardware = false
-        learnButton.title = "Learn Hardware Trigger…"
+        learnButton.title = L10n.text("Learn Hardware Trigger…")
         learnButton.isEnabled = true
 
         // Guard: only save if we actually captured something meaningful
@@ -950,19 +950,19 @@ final class ActionEditorViewController: NSViewController {
         let bindings = ConfigManager.shared.hardwareBindingsForCurrentProfile()
         if let binding = bindings[buttonIndex] {
             if let code = binding.keyCode {
-                hardwareBindingLabel.stringValue = "Trigger: KeyCode 0x\(String(code, radix: 16))"
+                hardwareBindingLabel.stringValue = L10n.text("Trigger: KeyCode 0x%@", String(code, radix: 16))
             } else if let page = binding.usagePage, let usage = binding.usage {
-                var desc = String(format: "Trigger: Page 0x%X, Usage 0x%X", page, usage)
+                var desc = L10n.text("Trigger: Page 0x%X, Usage 0x%X", page, usage)
                 if let val = binding.value {
-                    desc += " (Value: \(val))"
+                    desc += L10n.text(" (Value: %d)", val)
                 }
                 hardwareBindingLabel.stringValue = desc
             } else {
-                hardwareBindingLabel.stringValue = "Trigger: Custom"
+                hardwareBindingLabel.stringValue = L10n.text("Trigger: Custom")
             }
             clearHardwareButton.isHidden = false
         } else {
-            hardwareBindingLabel.stringValue = "Trigger: (Default)"
+            hardwareBindingLabel.stringValue = L10n.text("Trigger: (Default)")
             clearHardwareButton.isHidden = true
         }
     }

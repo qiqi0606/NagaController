@@ -266,11 +266,11 @@ final class EventTapManager {
 
     private func promptForInputMonitoring() {
         let alert = NSAlert()
-        alert.messageText = "Enable Input Monitoring"
-        alert.informativeText = "To block the original number keys, enable Input Monitoring for NagaController in System Settings → Privacy & Security → Input Monitoring."
+        alert.messageText = L10n.text("Enable Input Monitoring")
+        alert.informativeText = L10n.text("To block the original number keys, enable Input Monitoring for NagaController in System Settings → Privacy & Security → Input Monitoring.")
         alert.alertStyle = .informational
-        alert.addButton(withTitle: "Open Settings")
-        alert.addButton(withTitle: "Cancel")
+        alert.addButton(withTitle: L10n.text("Open Settings"))
+        alert.addButton(withTitle: L10n.text("Cancel"))
         let res = alert.runModal()
         if res == .alertFirstButtonReturn {
             if let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_ListenEvent") {

@@ -107,7 +107,7 @@ final class ButtonMapper {
             } else if mode == .toggle {
                 isHypershiftToggled.toggle()
                 NSLog("[Mapping] Hypershift toggled to \(isHypershiftToggled) by button \(buttonIndex)")
-                HUDNotifier.shared.show(isHypershiftToggled ? "Hypershift ON" : "Hypershift OFF")
+                HUDNotifier.shared.show(isHypershiftToggled ? L10n.text("Hypershift ON") : L10n.text("Hypershift OFF"))
             }
             lastHypershiftPressTime = CFAbsoluteTimeGetCurrent()
             return
@@ -182,7 +182,7 @@ final class ButtonMapper {
                 if holdDuration > 0.5, isHypershiftToggled {
                     isHypershiftToggled = false
                     NSLog("[Mapping] Hypershift TOGGLE force-deactivated via long hold (\(String(format: "%.2f", holdDuration))s)")
-                    HUDNotifier.shared.show("Hypershift OFF")
+                    HUDNotifier.shared.show(L10n.text("Hypershift OFF"))
                 }
             }
             return

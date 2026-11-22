@@ -31,16 +31,16 @@ enum MediaKeyType: Int, Codable, CaseIterable {
     
     var label: String {
         switch self {
-        case .playPause: return "Play/Pause"
-        case .nextTrack: return "Next Track"
-        case .prevTrack: return "Previous Track"
-        case .volumeUp: return "Volume Up"
-        case .volumeDown: return "Volume Down"
-        case .mute: return "Mute"
-        case .brightnessUp: return "Brightness Up"
-        case .brightnessDown: return "Brightness Down"
-        case .missionControl: return "Mission Control"
-        case .showDesktop: return "Show Desktop"
+        case .playPause: return L10n.text("Play/Pause")
+        case .nextTrack: return L10n.text("Next Track")
+        case .prevTrack: return L10n.text("Previous Track")
+        case .volumeUp: return L10n.text("Volume Up")
+        case .volumeDown: return L10n.text("Volume Down")
+        case .mute: return L10n.text("Mute")
+        case .brightnessUp: return L10n.text("Brightness Up")
+        case .brightnessDown: return L10n.text("Brightness Down")
+        case .missionControl: return L10n.text("Mission Control")
+        case .showDesktop: return L10n.text("Show Desktop")
         }
     }
 }

@@ -1,0 +1,2 @@
+"NSAppleEventsUsageDescription" = "NagaController 需要发送键盘事件来实现按键绑定。";
+"NSBluetoothAlwaysUsageDescription" = "NagaController 通过蓝牙查找鼠标并读取电量。";

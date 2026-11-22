@@ -9,14 +9,14 @@ final class MainViewController: NSViewController {
     }()
 
     private let statusLabel: NSTextField = {
-        let label = NSTextField(labelWithString: "Listen-only mode")
+        let label = NSTextField(labelWithString: L10n.text("Listen-only mode"))
         label.font = .systemFont(ofSize: 12)
         label.textColor = .secondaryLabelColor
         return label
     }()
 
     private let batteryLabel: NSTextField = {
-        let label = NSTextField(labelWithString: "Battery: —")
+        let label = NSTextField(labelWithString: L10n.text("Battery: —"))
         label.font = .systemFont(ofSize: 12)
         label.textColor = .secondaryLabelColor
         return label
@@ -24,9 +24,9 @@ final class MainViewController: NSViewController {
 
     private let batteryGlass = GlassyBatteryView()
 
-    private let toggle = NSButton(checkboxWithTitle: "Enable remapping (blocks original keys)", target: nil, action: nil)
-    private let launchAtLoginToggle = NSButton(checkboxWithTitle: "Launch at login", target: nil, action: nil)
-    private let dockIconToggle = NSButton(checkboxWithTitle: "Show icon in Dock", target: nil, action: nil)
+    private let toggle = NSButton(checkboxWithTitle: L10n.text("Enable remapping (blocks original keys)"), target: nil, action: nil)
+    private let launchAtLoginToggle = NSButton(checkboxWithTitle: L10n.text("Launch at login"), target: nil, action: nil)
+    private let dockIconToggle = NSButton(checkboxWithTitle: L10n.text("Show icon in Dock"), target: nil, action: nil)
     private let updateBanner: NSButton = {
         let b = NSButton(title: "", target: nil, action: nil)
         b.isBordered = false
@@ -36,15 +36,15 @@ final class MainViewController: NSViewController {
         return b
     }()
     private let configureButton: NSButton = {
-        let b = NSButton(title: "Configure mappings…", target: nil, action: nil)
+        let b = NSButton(title: L10n.text("Configure mappings…"), target: nil, action: nil)
         b.image = UIStyle.symbol("slider.horizontal.3", size: 14, weight: .semibold)
         b.imagePosition = .imageLeading
-        b.toolTip = "Open button mapping editor"
+        b.toolTip = L10n.text("Open button mapping editor")
         return b
     }()
 
     private let quitButton: NSButton = {
-        let b = NSButton(title: "Quit", target: nil, action: nil)
+        let b = NSButton(title: L10n.text("Quit"), target: nil, action: nil)
         b.image = UIStyle.symbol("power", size: 14, weight: .semibold)
         b.imagePosition = .imageLeading
         b.contentTintColor = .systemRed
@@ -56,7 +56,7 @@ final class MainViewController: NSViewController {
     private var updateObserver: NSObjectProtocol?
 
     private let permissionHeaderLabel: NSTextField = {
-        let label = NSTextField(labelWithString: "Permissions")
+        let label = NSTextField(labelWithString: L10n.text("Permissions"))
         label.font = .systemFont(ofSize: 12, weight: .semibold)
         if #available(macOS 10.14, *) {
             label.textColor = .secondaryLabelColor
@@ -65,14 +65,14 @@ final class MainViewController: NSViewController {
     }()
 
     private let accessibilityStatusLabel: NSTextField = {
-        let label = NSTextField(labelWithString: "Checking…")
+        let label = NSTextField(labelWithString: L10n.text("Checking…"))
         label.font = .systemFont(ofSize: 12)
         label.alignment = .right
         return label
     }()
 
     private let inputmonitoringStatusLabel: NSTextField = {
-        let label = NSTextField(labelWithString: "Checking…")
+        let label = NSTextField(labelWithString: L10n.text("Checking…"))
         label.font = .systemFont(ofSize: 12)
         label.alignment = .right
         return label
@@ -104,7 +104,7 @@ final class MainViewController: NSViewController {
         titleLabel.textColor = UIStyle.razerGreen
         
         let enabled = ConfigManager.shared.getRemappingEnabled()
-        statusLabel.stringValue = enabled ? "Remapping active" : "Listen-only mode"
+        statusLabel.stringValue = enabled ? L10n.text("Remapping active") : L10n.text("Listen-only mode")
         statusLabel.font = .systemFont(ofSize: 13, weight: .semibold)
         statusLabel.textColor = .white
         
@@ -175,7 +175,7 @@ final class MainViewController: NSViewController {
         dockIconToggle.state = UserDefaults.standard.bool(forKey: AppDelegate.showDockIconKey) ? .on : .off
         dockIconToggle.font = .systemFont(ofSize: 13, weight: .medium)
         dockIconToggle.contentTintColor = .white
-        dockIconToggle.toolTip = "The app lives in the menu bar. Turn this on if the menu bar icon is hidden on your Mac, or you prefer a Dock icon."
+        dockIconToggle.toolTip = L10n.text("The app lives in the menu bar. Turn this on if the menu bar icon is hidden on your Mac, or you prefer a Dock icon.")
 
         let dockIconContainer = NSStackView(views: [dockIconToggle])
         dockIconContainer.alignment = .centerX
@@ -211,8 +211,8 @@ final class MainViewController: NSViewController {
         permissionHeaderLabel.textColor = NSColor.white.withAlphaComponent(0.3)
         permStack.addArrangedSubview(permissionHeaderLabel)
         
-        permStack.addArrangedSubview(makePermissionRow(title: "Accessibility", statusLabel: accessibilityStatusLabel, selector: #selector(openAccessibilitySettings)))
-        permStack.addArrangedSubview(makePermissionRow(title: "Input Monitoring", statusLabel: inputmonitoringStatusLabel, selector: #selector(openInputMonitoringSettings)))
+        permStack.addArrangedSubview(makePermissionRow(title: L10n.text("Accessibility"), statusLabel: accessibilityStatusLabel, selector: #selector(openAccessibilitySettings)))
+        permStack.addArrangedSubview(makePermissionRow(title: L10n.text("Input Monitoring"), statusLabel: inputmonitoringStatusLabel, selector: #selector(openInputMonitoringSettings)))
         
         permCard.addSubview(permStack)
         permStack.translatesAutoresizingMaskIntoConstraints = false
@@ -244,7 +244,7 @@ final class MainViewController: NSViewController {
     @objc private func toggleChanged(_ sender: NSButton) {
         let enabled = (sender.state == .on)
         EventTapManager.shared.start(listenOnly: !enabled)
-        statusLabel.stringValue = enabled ? "Remapping active" : "Listen-only mode"
+        statusLabel.stringValue = enabled ? L10n.text("Remapping active") : L10n.text("Listen-only mode")
         statusLabel.textColor = .white
         ConfigManager.shared.setRemappingEnabled(enabled)
     }
@@ -280,7 +280,7 @@ final class MainViewController: NSViewController {
             updateBanner.isHidden = true
             return
         }
-        updateBanner.title = "Update available: v\(version)"
+        updateBanner.title = L10n.text("Update available: v%@", version)
         updateBanner.isHidden = false
     }
 
@@ -294,7 +294,7 @@ final class MainViewController: NSViewController {
 
     private func updateBattery() {
         if let level = BatteryMonitor.shared.batteryLevel {
-            batteryLabel.stringValue = "Battery: \(level)%"
+            batteryLabel.stringValue = L10n.text("Battery: %ld%%", level)
             if level <= 20 {
                 batteryLabel.textColor = .systemRed
             } else {
@@ -302,7 +302,7 @@ final class MainViewController: NSViewController {
             }
             batteryGlass.level = level
         } else {
-            batteryLabel.stringValue = "Battery: —"
+            batteryLabel.stringValue = L10n.text("Battery: —")
             batteryLabel.textColor = .white.withAlphaComponent(0.6)
             batteryGlass.level = nil
         }
@@ -328,11 +328,11 @@ final class MainViewController: NSViewController {
         UserDefaults.standard.set(true, forKey: nudgeKey)
 
         let alert = NSAlert()
-        alert.messageText = "Turn on remapping?"
-        alert.informativeText = "Accessibility and Input Monitoring are both granted. Saved button mappings only take effect once remapping is switched on."
+        alert.messageText = L10n.text("Turn on remapping?")
+        alert.informativeText = L10n.text("Accessibility and Input Monitoring are both granted. Saved button mappings only take effect once remapping is switched on.")
         alert.alertStyle = .informational
-        alert.addButton(withTitle: "Turn On")
-        alert.addButton(withTitle: "Not Now")
+        alert.addButton(withTitle: L10n.text("Turn On"))
+        alert.addButton(withTitle: L10n.text("Not Now"))
         if alert.runModal() == .alertFirstButtonReturn {
             toggle.state = .on
             toggleChanged(toggle)
@@ -340,7 +340,7 @@ final class MainViewController: NSViewController {
     }
 
     private func updateStatus(label: NSTextField, granted: Bool) {
-        label.stringValue = granted ? "Granted" : "Missing"
+        label.stringValue = granted ? L10n.text("Granted") : L10n.text("Missing")
         if #available(macOS 10.14, *) {
             label.textColor = granted ? .systemGreen : .systemOrange
         } else {
@@ -360,7 +360,7 @@ final class MainViewController: NSViewController {
 
         let spacer = NSView()
 
-        let button = NSButton(title: "Open Settings", target: self, action: selector)
+        let button = NSButton(title: L10n.text("Open Settings"), target: self, action: selector)
         UIStyle.styleSecondaryButton(button)
         button.heightAnchor.constraint(equalToConstant: 24).isActive = true
         button.widthAnchor.constraint(equalToConstant: 120).isActive = true

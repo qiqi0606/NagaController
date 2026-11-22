@@ -11,7 +11,7 @@ final class MappingViewController: NSViewController {
     }()
 
     private let subHeaderLabel: NSTextField = {
-        let l = NSTextField(labelWithString: "BUTTON MAPPING CONFIGURATION")
+        let l = NSTextField(labelWithString: L10n.text("BUTTON MAPPING CONFIGURATION"))
         l.font = .systemFont(ofSize: 11, weight: .black)
         l.textColor = NSColor.white.withAlphaComponent(0.3)
         return l
@@ -19,7 +19,7 @@ final class MappingViewController: NSViewController {
 
     private let profilePopup: NSPopUpButton = NSPopUpButton(frame: .zero, pullsDown: false)
     private let managePopup: NSPopUpButton = NSPopUpButton(frame: .zero, pullsDown: true)
-    private let saveButton: NSButton = NSButton(title: "Save", target: nil, action: nil)
+    private let saveButton: NSButton = NSButton(title: L10n.text("Save"), target: nil, action: nil)
     private let stack = NSStackView() // unused legacy
     private var grid: NSGridView?
     private var isHypershiftView = false
@@ -70,7 +70,7 @@ final class MappingViewController: NSViewController {
         topBar.distribution = .fill
         topBar.spacing = 16
 
-        let profileLabel = NSTextField(labelWithString: "Profile:")
+        let profileLabel = NSTextField(labelWithString: L10n.text("Profile:"))
         profileLabel.textColor = .white
         profilePopup.target = self
         profilePopup.action = #selector(profileChanged(_:))
@@ -83,7 +83,7 @@ final class MappingViewController: NSViewController {
         saveButton.action = #selector(saveTapped)
         saveButton.image = UIStyle.symbol("tray.and.arrow.down", size: 14, weight: .semibold)
         saveButton.imagePosition = .imageLeading
-        saveButton.toolTip = "Save all changes to disk"
+        saveButton.toolTip = L10n.text("Save all changes to disk")
         UIStyle.stylePrimaryButton(saveButton)
         saveButton.widthAnchor.constraint(equalToConstant: 96).isActive = true
         saveButton.heightAnchor.constraint(equalToConstant: 32).isActive = true
@@ -179,7 +179,7 @@ final class MappingViewController: NSViewController {
             wheelStack.addArrangedSubview(card)
         }
 
-        let wheelHint = NSTextField(labelWithString: "Wheel controls need pairing. Open Configure, choose Learn Hardware Trigger, then tilt or click the wheel.")
+        let wheelHint = NSTextField(labelWithString: L10n.text("Wheel controls need pairing. Open Configure, choose Learn Hardware Trigger, then tilt or click the wheel."))
         wheelHint.font = .systemFont(ofSize: 11)
         wheelHint.textColor = NSColor.white.withAlphaComponent(0.5)
         wheelHint.lineBreakMode = .byWordWrapping
@@ -315,19 +315,19 @@ final class MappingViewController: NSViewController {
         let m = managePopup.menu ?? NSMenu()
         m.removeAllItems()
 
-        let title = NSMenuItem(title: "Manage Profiles", action: nil, keyEquivalent: "")
+        let title = NSMenuItem(title: L10n.text("Manage Profiles"), action: nil, keyEquivalent: "")
         title.isEnabled = false
         m.addItem(title)
         m.addItem(.separator())
 
-        m.addItem(makeMenuItem("New…", action: #selector(newProfile), symbol: "plus.circle"))
-        m.addItem(makeMenuItem("Duplicate…", action: #selector(duplicateProfile), symbol: "doc.on.doc"))
-        m.addItem(makeMenuItem("Rename…", action: #selector(renameProfile), symbol: "pencil"))
-        m.addItem(makeMenuItem("Delete…", action: #selector(deleteProfile), symbol: "trash", tintRed: true))
+        m.addItem(makeMenuItem(L10n.text("New…"), action: #selector(newProfile), symbol: "plus.circle"))
+        m.addItem(makeMenuItem(L10n.text("Duplicate…"), action: #selector(duplicateProfile), symbol: "doc.on.doc"))
+        m.addItem(makeMenuItem(L10n.text("Rename…"), action: #selector(renameProfile), symbol: "pencil"))
+        m.addItem(makeMenuItem(L10n.text("Delete…"), action: #selector(deleteProfile), symbol: "trash", tintRed: true))
         m.addItem(.separator())
-        m.addItem(makeMenuItem("Import…", action: #selector(importProfiles), symbol: "square.and.arrow.down"))
-        m.addItem(makeMenuItem("Export Current…", action: #selector(exportCurrentProfile), symbol: "square.and.arrow.up"))
-        m.addItem(makeMenuItem("Export All…", action: #selector(exportAllProfiles), symbol: "square.and.arrow.up.on.square"))
+        m.addItem(makeMenuItem(L10n.text("Import…"), action: #selector(importProfiles), symbol: "square.and.arrow.down"))
+        m.addItem(makeMenuItem(L10n.text("Export Current…"), action: #selector(exportCurrentProfile), symbol: "square.and.arrow.up"))
+        m.addItem(makeMenuItem(L10n.text("Export All…"), action: #selector(exportAllProfiles), symbol: "square.and.arrow.up.on.square"))
 
         managePopup.menu = m
         managePopup.select(nil)
@@ -374,7 +374,7 @@ final class MappingViewController: NSViewController {
         buttonRow.alignment = .centerY
         buttonRow.spacing = 8
 
-        let edit = NSButton(title: "Configure", target: nil, action: nil)
+        let edit = NSButton(title: L10n.text("Configure"), target: nil, action: nil)
         edit.image = UIStyle.symbol("pencil", size: 12, weight: .bold)
         edit.imagePosition = .imageLeading
         edit.tag = index
@@ -389,8 +389,8 @@ final class MappingViewController: NSViewController {
         let clear = NSButton(title: "", target: nil, action: nil)
         clear.image = UIStyle.symbol("trash", size: 12, weight: .medium)
         clear.imagePosition = .imageOnly
-        clear.toolTip = "Reset mapping for \(displayName(for: index))"
-        clear.setAccessibilityLabel("Reset mapping for \(displayName(for: index))")
+        clear.toolTip = L10n.text("Reset mapping for %@", displayName(for: index))
+        clear.setAccessibilityLabel(L10n.text("Reset mapping for %@", displayName(for: index)))
         clear.tag = index
         clear.target = self
         clear.action = #selector(clearTapped(_:))
@@ -432,12 +432,12 @@ final class MappingViewController: NSViewController {
 
     private func displayName(for index: Int) -> String {
         switch index {
-        case 13: return "DPI Up"
-        case 14: return "DPI Down"
-        case 15: return "Wheel Tilt Left"
-        case 16: return "Wheel Tilt Right"
-        case 17: return "Wheel Click"
-        default: return "Button \(index)"
+        case 13: return L10n.text("DPI Up")
+        case 14: return L10n.text("DPI Down")
+        case 15: return L10n.text("Wheel Tilt Left")
+        case 16: return L10n.text("Wheel Tilt Right")
+        case 17: return L10n.text("Wheel Click")
+        default: return L10n.text("Button %ld", index)
         }
     }
 
@@ -462,25 +462,25 @@ final class MappingViewController: NSViewController {
     }
 
     private func actionDescription(_ action: ActionType?) -> String {
-        guard let action = action else { return "(Unassigned)" }
+        guard let action = action else { return L10n.text("(Unassigned)") }
         switch action {
         case .keySequence(let keys, let d):
             let ks = keys.map { $0.formattedShortcut() }.joined(separator: ", ")
             return d ?? ks
         case .application(let path, let d):
-            return d ?? "App: \(URL(fileURLWithPath: path).lastPathComponent)"
+            return d ?? L10n.text("App: %@", URL(fileURLWithPath: path).lastPathComponent)
         case .systemCommand(let cmd, let d):
-            return d ?? "Script: \(cmd)"
+            return d ?? L10n.text("Script: %@", cmd)
         case .textSnippet(let text, let d):
             let preview = text.replacingOccurrences(of: "\n", with: " ⏎ ")
             let truncated = preview.count > 40 ? String(preview.prefix(37)) + "…" : preview
-            return d ?? "Text: \(truncated)"
+            return d ?? L10n.text("Text: %@", truncated)
         case .macro(_, let d):
-            return d ?? "Macro"
+            return d ?? L10n.text("Macro")
         case .profileSwitch(let p, let d):
-            return d ?? "Profile: \(p)"
+            return d ?? L10n.text("Profile: %@", p)
         case .hypershift:
-            return "Hypershift Modifier"
+            return L10n.text("Hypershift Modifier")
         case .mediaKey(let key, let d):
             return d ?? key.label
         }
@@ -523,46 +523,46 @@ final class MappingViewController: NSViewController {
     // MARK: - Manage actions
 
     @objc private func newProfile() {
-        guard let name = promptForText(title: "New Profile", message: "Enter a name for the new profile:", defaultValue: "") else { return }
+        guard let name = promptForText(title: L10n.text("New Profile"), message: L10n.text("Enter a name for the new profile:"), defaultValue: "") else { return }
         if ConfigManager.shared.createProfile(name: name) {
             ConfigManager.shared.saveUserProfiles()
             refreshRows()
         } else {
-            showInfo("Couldn't create profile. Name may be empty or already exists.")
+            showInfo(L10n.text("Couldn't create profile. Name may be empty or already exists."))
         }
     }
 
     @objc private func duplicateProfile() {
         let current = ConfigManager.shared.currentProfileName
-        guard let name = promptForText(title: "Duplicate Profile", message: "Enter a name for the duplicated profile:", defaultValue: "\(current) copy") else { return }
+        guard let name = promptForText(title: L10n.text("Duplicate Profile"), message: L10n.text("Enter a name for the duplicated profile:"), defaultValue: L10n.text("%@ copy", current)) else { return }
         if ConfigManager.shared.duplicateProfile(source: current, as: name) {
             ConfigManager.shared.saveUserProfiles()
             refreshRows()
         } else {
-            showInfo("Couldn't duplicate. Name may be empty or already exists.")
+            showInfo(L10n.text("Couldn't duplicate. Name may be empty or already exists."))
         }
     }
 
     @objc private func renameProfile() {
         let current = ConfigManager.shared.currentProfileName
-        guard let name = promptForText(title: "Rename Profile", message: "Enter a new name for profile ‘\(current)’:", defaultValue: current) else { return }
+        guard let name = promptForText(title: L10n.text("Rename Profile"), message: L10n.text("Enter a new name for profile ‘%@’:", current), defaultValue: current) else { return }
         if ConfigManager.shared.renameProfile(from: current, to: name) {
             ConfigManager.shared.saveUserProfiles()
             refreshRows()
         } else {
-            showInfo("Couldn't rename. New name may be invalid or already exists.")
+            showInfo(L10n.text("Couldn't rename. New name may be invalid or already exists."))
         }
     }
 
     @objc private func deleteProfile() {
         let current = ConfigManager.shared.currentProfileName
-        let ok = confirm("Delete Profile", message: "Are you sure you want to delete ‘\(current)’? This cannot be undone.")
+        let ok = confirm(L10n.text("Delete Profile"), message: L10n.text("Are you sure you want to delete ‘%@’? This cannot be undone.", current))
         if ok {
             if ConfigManager.shared.deleteProfile(named: current) {
                 ConfigManager.shared.saveUserProfiles()
                 refreshRows()
             } else {
-                showInfo("Couldn't delete profile (it may be the last remaining profile).")
+                showInfo(L10n.text("Couldn't delete profile (it may be the last remaining profile)."))
             }
         }
     }
@@ -580,18 +580,20 @@ final class MappingViewController: NSViewController {
                 let shellCount = ConfigManager.countShellCommandActions(in: file)
                 if shellCount > 0 {
                     let alert = NSAlert()
-                    alert.messageText = "This profile runs shell commands"
-                    alert.informativeText = "\(shellCount) button\(shellCount == 1 ? "" : "s") in this file run a shell command as soon as it's pressed. Only import it if you trust where it came from."
+                    alert.messageText = L10n.text("This profile runs shell commands")
+                    alert.informativeText = shellCount == 1
+                        ? L10n.text("%ld button in this file runs a shell command as soon as it’s pressed. Only import it if you trust where it came from.", shellCount)
+                        : L10n.text("%ld buttons in this file run a shell command as soon as they’re pressed. Only import it if you trust where it came from.", shellCount)
                     alert.alertStyle = .warning
-                    alert.addButton(withTitle: "Import Anyway")
-                    alert.addButton(withTitle: "Cancel")
+                    alert.addButton(withTitle: L10n.text("Import Anyway"))
+                    alert.addButton(withTitle: L10n.text("Cancel"))
                     guard alert.runModal() == .alertFirstButtonReturn else { return }
                 }
                 ConfigManager.shared.importProfiles(file, merge: true)
                 ConfigManager.shared.saveUserProfiles()
                 self.refreshRows()
             } catch {
-                self.showInfo("Failed to import: \(error.localizedDescription)")
+                self.showInfo(L10n.text("Failed to import: %@", error.localizedDescription))
             }
         }
     }
@@ -605,7 +607,7 @@ final class MappingViewController: NSViewController {
             do {
                 try ConfigManager.shared.exportCurrentProfile(to: url)
             } catch {
-                self.showInfo("Failed to export: \(error.localizedDescription)")
+                self.showInfo(L10n.text("Failed to export: %@", error.localizedDescription))
             }
         }
     }
@@ -619,7 +621,7 @@ final class MappingViewController: NSViewController {
             do {
                 try ConfigManager.shared.exportAllProfiles(to: url)
             } catch {
-                self.showInfo("Failed to export: \(error.localizedDescription)")
+                self.showInfo(L10n.text("Failed to export: %@", error.localizedDescription))
             }
         }
     }
@@ -634,8 +636,8 @@ final class MappingViewController: NSViewController {
         let tf = NSTextField(string: defaultValue)
         tf.frame = NSRect(x: 0, y: 0, width: 260, height: 24)
         alert.accessoryView = tf
-        alert.addButton(withTitle: "OK")
-        alert.addButton(withTitle: "Cancel")
+        alert.addButton(withTitle: L10n.text("OK"))
+        alert.addButton(withTitle: L10n.text("Cancel"))
         let resp = alert.runModal()
         guard resp == .alertFirstButtonReturn else { return nil }
         return tf.stringValue
@@ -646,8 +648,8 @@ final class MappingViewController: NSViewController {
         alert.messageText = title
         alert.informativeText = message
         alert.alertStyle = .warning
-        alert.addButton(withTitle: "Delete")
-        alert.addButton(withTitle: "Cancel")
+        alert.addButton(withTitle: L10n.text("Delete"))
+        alert.addButton(withTitle: L10n.text("Cancel"))
         return alert.runModal() == .alertFirstButtonReturn
     }
 
@@ -663,10 +665,10 @@ final class MappingViewController: NSViewController {
 
     private func showInfo(_ message: String) {
         let alert = NSAlert()
-        alert.messageText = "Info"
+        alert.messageText = L10n.text("Info")
         alert.informativeText = message
         alert.alertStyle = .informational
-        alert.addButton(withTitle: "OK")
+        alert.addButton(withTitle: L10n.text("OK"))
         alert.runModal()
     }
 }

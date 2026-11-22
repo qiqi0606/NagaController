@@ -50,11 +50,11 @@ final class PermissionManager {
         guard !isProcessTrusted() else { return }
 
         let alert = NSAlert()
-        alert.messageText = "Accessibility Permission Required"
-        alert.informativeText = "NagaController needs Accessibility permission to remap buttons.\n\nPlease add NagaController in:\nSystem Settings → Privacy & Security → Accessibility\n\nYou may need to restart the app after granting permission."
+        alert.messageText = L10n.text("Accessibility Permission Required")
+        alert.informativeText = L10n.text("NagaController needs Accessibility permission to remap buttons.\n\nPlease add NagaController in:\nSystem Settings → Privacy & Security → Accessibility\n\nYou may need to restart the app after granting permission.")
         alert.alertStyle = .warning
-        alert.addButton(withTitle: "Open System Settings")
-        alert.addButton(withTitle: "OK")
+        alert.addButton(withTitle: L10n.text("Open System Settings"))
+        alert.addButton(withTitle: L10n.text("OK"))
 
         if alert.runModal() == .alertFirstButtonReturn,
            let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility") {

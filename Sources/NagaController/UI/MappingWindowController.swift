@@ -13,7 +13,7 @@ final class MappingWindowController: NSWindowController, NSWindowDelegate {
         // Light mode.
         window.appearance = NSAppearance(named: .darkAqua)
         window.styleMask = [.titled, .closable, .miniaturizable, .resizable]
-        window.title = "NagaController — Button Mappings"
+        window.title = L10n.text("NagaController — Button Mappings")
         window.titleVisibility = .hidden
         window.titlebarAppearsTransparent = true
         window.styleMask.insert(.fullSizeContentView)

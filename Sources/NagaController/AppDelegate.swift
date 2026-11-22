@@ -160,8 +160,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         if lvl <= 20 && !didAlertLowBattery {
             didAlertLowBattery = true
             let content = UNMutableNotificationContent()
-            content.title = "Mouse battery low"
-            content.body = "Your Naga battery is at \(lvl)%"
+            content.title = L10n.text("Mouse battery low")
+            content.body = L10n.text("Your Naga battery is at %ld%%", lvl)
             let req = UNNotificationRequest(identifier: "naga.lowbattery", content: content, trigger: nil)
             UNUserNotificationCenter.current().add(req, withCompletionHandler: nil)
         }
@@ -176,10 +176,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         let profile = ConfigManager.shared.currentProfileName
         if let lvl = level {
             button.title = (hasImage ? " " : "🖱️ ") + "\(lvl)% · \(profile)"
-            button.toolTip = "Naga battery: \(lvl)% · Profile: \(profile)"
+            button.toolTip = L10n.text("Naga battery: %ld%% · Profile: %@", lvl, profile)
         } else {
             button.title = (hasImage ? " " : "🖱️ ") + profile
-            button.toolTip = "Naga battery: — · Profile: \(profile)"
+            button.toolTip = L10n.text("Naga battery: — · Profile: %@", profile)
         }
     }
 

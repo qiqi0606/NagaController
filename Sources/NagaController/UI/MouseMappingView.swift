@@ -37,7 +37,7 @@ final class MouseMappingView: NSView {
             let l = NSTextField(labelWithString: "")
             l.lineBreakMode = .byTruncatingTail
             l.font = .systemFont(ofSize: 12)
-            l.toolTip = "Click to edit mapping for button \(i)"
+            l.toolTip = L10n.text("Click to edit mapping for button %ld", i)
             l.isSelectable = false
             l.isEditable = false
             l.drawsBackground = true
@@ -175,25 +175,25 @@ final class MouseMappingView: NSView {
     }
 
     private func actionDescription(_ action: ActionType?) -> String {
-        guard let action = action else { return "(Unassigned)" }
+        guard let action = action else { return L10n.text("(Unassigned)") }
         switch action {
         case .keySequence(let keys, let d):
             let ks = keys.map { $0.formattedShortcut() }.joined(separator: ", ")
-            return d ?? "Key Sequence: \(ks)"
+            return d ?? L10n.text("Key Sequence: %@", ks)
         case .application(let path, let d):
-            return d ?? "Open App: \(path)"
+            return d ?? L10n.text("Open App: %@", path)
         case .systemCommand(let cmd, let d):
-            return d ?? "Command: \(cmd)"
+            return d ?? L10n.text("Command: %@", cmd)
         case .textSnippet(let text, let d):
             let preview = text.replacingOccurrences(of: "\n", with: " ⏎ ")
             let truncated = preview.count > 40 ? String(preview.prefix(37)) + "…" : preview
-            return d ?? "Type Text: \(truncated)"
+            return d ?? L10n.text("Type Text: %@", truncated)
         case .macro(_, let d):
-            return d ?? "Macro"
+            return d ?? L10n.text("Macro")
         case .profileSwitch(let p, let d):
-            return d ?? "Switch Profile: \(p)"
+            return d ?? L10n.text("Switch Profile: %@", p)
         case .hypershift:
-            return "Hypershift Modifier"
+            return L10n.text("Hypershift Modifier")
         case .mediaKey(let key, let d):
             return d ?? key.label
         }
