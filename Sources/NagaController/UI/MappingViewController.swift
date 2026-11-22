@@ -115,10 +115,13 @@ final class MappingViewController: NSViewController {
 
         // (Removed mouse visualization)
 
+        let cardSpacing: CGFloat = 12
+        let groupInset: CGFloat = 12
+
         // Three equal-width columns of cards
-        let col1 = NSStackView(); col1.orientation = .vertical; col1.spacing = 16
-        let col2 = NSStackView(); col2.orientation = .vertical; col2.spacing = 16
-        let col3 = NSStackView(); col3.orientation = .vertical; col3.spacing = 16
+        let col1 = NSStackView(); col1.orientation = .vertical; col1.spacing = cardSpacing
+        let col2 = NSStackView(); col2.orientation = .vertical; col2.spacing = cardSpacing
+        let col3 = NSStackView(); col3.orientation = .vertical; col3.spacing = cardSpacing
 
         for idx in stride(from: 1, through: 10, by: 3) {
             let v = makeCard(for: idx); rowViews[idx] = v; col1.addArrangedSubview(v)
@@ -132,7 +135,7 @@ final class MappingViewController: NSViewController {
 
         let columns = NSStackView(views: [col1, col2, col3])
         columns.orientation = .horizontal
-        columns.spacing = 16
+        columns.spacing = cardSpacing
         columns.distribution = .fillEqually
         columns.translatesAutoresizingMaskIntoConstraints = false
 
@@ -140,16 +143,16 @@ final class MappingViewController: NSViewController {
         let cardsCard = UIStyle.makeCard()
         cardsCard.addSubview(columns)
         NSLayoutConstraint.activate([
-            columns.leadingAnchor.constraint(equalTo: cardsCard.leadingAnchor, constant: 16),
-            columns.trailingAnchor.constraint(equalTo: cardsCard.trailingAnchor, constant: -16),
-            columns.topAnchor.constraint(equalTo: cardsCard.topAnchor, constant: 16),
-            columns.bottomAnchor.constraint(equalTo: cardsCard.bottomAnchor, constant: -16)
+            columns.leadingAnchor.constraint(equalTo: cardsCard.leadingAnchor, constant: groupInset),
+            columns.trailingAnchor.constraint(equalTo: cardsCard.trailingAnchor, constant: -groupInset),
+            columns.topAnchor.constraint(equalTo: cardsCard.topAnchor, constant: groupInset),
+            columns.bottomAnchor.constraint(equalTo: cardsCard.bottomAnchor, constant: -groupInset)
         ])
 
         let dpiStack = NSStackView()
         dpiStack.translatesAutoresizingMaskIntoConstraints = false
         dpiStack.orientation = .horizontal
-        dpiStack.spacing = 16
+        dpiStack.spacing = cardSpacing
         dpiStack.distribution = .fillEqually
         for idx in [13, 14] {
             let card = makeCard(for: idx)
@@ -160,10 +163,10 @@ final class MappingViewController: NSViewController {
         let extrasCard = UIStyle.makeCard()
         extrasCard.addSubview(dpiStack)
         NSLayoutConstraint.activate([
-            dpiStack.leadingAnchor.constraint(equalTo: extrasCard.leadingAnchor, constant: 16),
-            dpiStack.trailingAnchor.constraint(equalTo: extrasCard.trailingAnchor, constant: -16),
-            dpiStack.topAnchor.constraint(equalTo: extrasCard.topAnchor, constant: 16),
-            dpiStack.bottomAnchor.constraint(equalTo: extrasCard.bottomAnchor, constant: -16)
+            dpiStack.leadingAnchor.constraint(equalTo: extrasCard.leadingAnchor, constant: groupInset),
+            dpiStack.trailingAnchor.constraint(equalTo: extrasCard.trailingAnchor, constant: -groupInset),
+            dpiStack.topAnchor.constraint(equalTo: extrasCard.topAnchor, constant: groupInset),
+            dpiStack.bottomAnchor.constraint(equalTo: extrasCard.bottomAnchor, constant: -groupInset)
         ])
 
         // Wheel controls ship unbound: each user pairs them to their own mouse
@@ -171,7 +174,7 @@ final class MappingViewController: NSViewController {
         let wheelStack = NSStackView()
         wheelStack.translatesAutoresizingMaskIntoConstraints = false
         wheelStack.orientation = .horizontal
-        wheelStack.spacing = 16
+        wheelStack.spacing = cardSpacing
         wheelStack.distribution = .fillEqually
         for idx in [15, 16, 17] {
             let card = makeCard(for: idx)
@@ -194,17 +197,18 @@ final class MappingViewController: NSViewController {
         let wheelCard = UIStyle.makeCard()
         wheelCard.addSubview(wheelColumn)
         NSLayoutConstraint.activate([
-            wheelColumn.leadingAnchor.constraint(equalTo: wheelCard.leadingAnchor, constant: 16),
-            wheelColumn.trailingAnchor.constraint(equalTo: wheelCard.trailingAnchor, constant: -16),
-            wheelColumn.topAnchor.constraint(equalTo: wheelCard.topAnchor, constant: 16),
-            wheelColumn.bottomAnchor.constraint(equalTo: wheelCard.bottomAnchor, constant: -16),
+            wheelColumn.leadingAnchor.constraint(equalTo: wheelCard.leadingAnchor, constant: groupInset),
+            wheelColumn.trailingAnchor.constraint(equalTo: wheelCard.trailingAnchor, constant: -groupInset),
+            wheelColumn.topAnchor.constraint(equalTo: wheelCard.topAnchor, constant: groupInset),
+            wheelColumn.bottomAnchor.constraint(equalTo: wheelCard.bottomAnchor, constant: -groupInset),
+            wheelHint.widthAnchor.constraint(lessThanOrEqualTo: wheelColumn.widthAnchor),
             wheelStack.leadingAnchor.constraint(equalTo: wheelColumn.leadingAnchor),
             wheelStack.trailingAnchor.constraint(equalTo: wheelColumn.trailingAnchor)
         ])
 
         let contentStack = NSStackView()
         contentStack.orientation = .vertical
-        contentStack.spacing = 16
+        contentStack.spacing = cardSpacing
         contentStack.translatesAutoresizingMaskIntoConstraints = false
         contentStack.addArrangedSubview(cardsCard)
         contentStack.addArrangedSubview(extrasCard)
@@ -348,7 +352,7 @@ final class MappingViewController: NSViewController {
         // Vertical content stack inside card
         let v = NSStackView()
         v.orientation = .vertical
-        v.spacing = 8
+        v.spacing = 4
         v.alignment = .leading
         v.translatesAutoresizingMaskIntoConstraints = false
 
@@ -372,7 +376,7 @@ final class MappingViewController: NSViewController {
         let buttonRow = NSStackView()
         buttonRow.orientation = .horizontal
         buttonRow.alignment = .centerY
-        buttonRow.spacing = 8
+        buttonRow.spacing = 6
 
         let edit = NSButton(title: L10n.text("Configure"), target: nil, action: nil)
         edit.image = UIStyle.symbol("pencil", size: 12, weight: .bold)
@@ -382,8 +386,7 @@ final class MappingViewController: NSViewController {
         edit.action = #selector(editTapped(_:))
         UIStyle.stylePrimaryButton(edit)
         
-        // Make edit button wider
-        edit.widthAnchor.constraint(equalToConstant: 100).isActive = true
+        edit.widthAnchor.constraint(equalToConstant: 88).isActive = true
         edit.heightAnchor.constraint(equalToConstant: 32).isActive = true
 
         let clear = NSButton(title: "", target: nil, action: nil)
@@ -414,12 +417,15 @@ final class MappingViewController: NSViewController {
         v.addArrangedSubview(buttonRow)
 
         card.addSubview(v)
+        let inset: CGFloat = 10
         NSLayoutConstraint.activate([
-            v.leadingAnchor.constraint(equalTo: card.leadingAnchor, constant: 16),
-            v.trailingAnchor.constraint(equalTo: card.trailingAnchor, constant: -16),
-            v.topAnchor.constraint(equalTo: card.topAnchor, constant: 16),
-            v.bottomAnchor.constraint(equalTo: card.bottomAnchor, constant: -16),
-            card.heightAnchor.constraint(equalToConstant: 160) // Enforce uniform height
+            v.leadingAnchor.constraint(equalTo: card.leadingAnchor, constant: inset),
+            v.trailingAnchor.constraint(equalTo: card.trailingAnchor, constant: -inset),
+            v.topAnchor.constraint(equalTo: card.topAnchor, constant: inset),
+            v.bottomAnchor.constraint(equalTo: card.bottomAnchor, constant: -inset),
+            desc.widthAnchor.constraint(lessThanOrEqualTo: v.widthAnchor),
+            card.widthAnchor.constraint(equalToConstant: 152),
+            card.heightAnchor.constraint(equalToConstant: 128)
         ])
 
         // Hover glow for card
@@ -450,7 +456,9 @@ final class MappingViewController: NSViewController {
     private func refreshRows() {
         let mapping = isHypershiftView ? ConfigManager.shared.hypershiftMappingForCurrentProfile() : ConfigManager.shared.mappingForCurrentProfile()
         for i in 1...17 {
-            descLabels[i]?.stringValue = actionDescription(mapping[i])
+            let description = actionDescription(mapping[i])
+            descLabels[i]?.stringValue = description
+            descLabels[i]?.toolTip = description
         }
         
         // Update toggle appearance

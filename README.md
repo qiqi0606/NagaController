@@ -10,6 +10,7 @@ A macOS menu bar app to remap the 12 side buttons of the Razer Naga V2 Hyperspee
 
 ### 2026-11-22 · `zh-hans`
 
+- 缩小按键绑定页的侧键、DPI 和滚轮卡片，减少卡片间距。
 - 新增 Naga V2 HyperSpeed 2.4 GHz USB 接收器的电量读取。应用启动时读取，之后约每分钟刷新，沿用已有的「输入监控」权限。
 - 新增简体中文界面。
 
